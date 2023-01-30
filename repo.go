@@ -4,36 +4,36 @@ import (
 	"sync"
 )
 
-type repository interface {
-	Get(id int) (event, bool)
-	GetAll() []event
-	Set(e event) error
+type Repository interface {
+	Get(id int) (Event, bool)
+	GetAll() []Event
+	Set(e Event) error
 	Delete(id int) error
 }
 
 func NewInMemRepo() *InMemRepo {
-	return &InMemRepo{events: make([]event, 0)}
+	return &InMemRepo{events: make([]Event, 0)}
 }
 
 type InMemRepo struct {
 	sync.Mutex
-	events []event
+	events []Event
 }
 
-func (imr *InMemRepo) Get(id int) (event, bool) {
+func (imr *InMemRepo) Get(id int) (Event, bool) {
 	for _, e := range imr.events {
 		if e.ID == id {
 			return e, true
 		}
 	}
-	return event{}, false
+	return Event{}, false
 }
 
-func (imr *InMemRepo) GetAll() []event {
+func (imr *InMemRepo) GetAll() []Event {
 	return imr.events
 }
 
-func (imr *InMemRepo) Set(e event) error {
+func (imr *InMemRepo) Set(e Event) error {
 	imr.Lock()
 	defer imr.Unlock()
 

@@ -24,7 +24,7 @@ func (a *autoInc) ID() int {
 	return a.id
 }
 
-type event struct {
+type Event struct {
 	ID          int    `json:"ID"`
 	Title       string `json:"Title"`
 	Description string `json:"Description"`
@@ -32,15 +32,15 @@ type event struct {
 
 type Handler struct {
 	counter autoInc
-	repo    repository
+	repo    Repository
 }
 
-func NewHandler(repo repository) *Handler {
+func NewHandler(repo Repository) *Handler {
 	return &Handler{counter: autoInc{}, repo: repo}
 }
 
 func (h *Handler) createEvent(w http.ResponseWriter, r *http.Request) {
-	var newEvent event
+	var newEvent Event
 	newEvent.ID = h.counter.ID()
 
 	reqBody, err := io.ReadAll(r.Body)
@@ -72,7 +72,7 @@ func (h *Handler) getOneEvent(w http.ResponseWriter, r *http.Request) {
 
 	e, ok := h.repo.Get(eventID)
 	if !ok {
-		http.Error(w, "event not found", http.StatusNotFound)
+		http.Error(w, "Event not found", http.StatusNotFound)
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -103,7 +103,7 @@ func (h *Handler) updateEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var updatedEvent event
+	var updatedEvent Event
 	err = json.Unmarshal(reqBody, &updatedEvent)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -142,7 +142,7 @@ func main() {
 	rep := NewInMemRepo()
 	h := NewHandler(rep)
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/event", h.createEvent).Methods("POST")
+	router.HandleFunc("/Event", h.createEvent).Methods("POST")
 	router.HandleFunc("/events", h.getAllEvents).Methods("GET")
 	router.HandleFunc("/events/{id}", h.getOneEvent).Methods("GET")
 	router.HandleFunc("/events/{id}", h.updateEvent).Methods("PATCH")
